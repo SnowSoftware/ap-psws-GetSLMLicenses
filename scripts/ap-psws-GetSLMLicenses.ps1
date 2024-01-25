@@ -31,7 +31,7 @@ function get-pswsslmlicenses {
     #SLMHelper is available at https://github.com/SnowSoftware/slm-module-SLMHelper
     if (-not (Get-Module SLMHelper)) {
         Try {
-            Import-Module SLMHelper
+            Import-Module SLMHelper -ErrorAction Stop
         }
         catch {
             Write-Error "Failed to import SLMHelper module."
@@ -66,7 +66,8 @@ function get-pswsslmlicenses {
     return $SLMLicenses
     
 }
-    
+
+## Object Properties
 #Id              
 #ApplicationName 
 #ManufacturerName
@@ -78,7 +79,7 @@ function get-pswsslmlicenses {
 #UpdatedDate     
 #UpdatedBy       
     
-    
+## Examples
 #get-pswsslmlicenses
 #get-pswsslmlicenses -LicenseId 3
 #get-pswsslmlicenses -filter "ApplicationName eq 'IBM Spectrum Protect 7.1 for Mail'"
