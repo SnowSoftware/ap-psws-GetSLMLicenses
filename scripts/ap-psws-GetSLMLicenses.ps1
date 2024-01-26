@@ -1,5 +1,5 @@
 function get-pswsslmlicenses {
-    param($LicenseId, $filter)
+    param($LicenseId, $queryfilter, $ApplicationNameSearch)
     
     
     #region debug setup
@@ -52,8 +52,8 @@ function get-pswsslmlicenses {
     $SLMApiEndpointConfiguration = New-SLMApiEndpointConfiguration -SLMUri $SLMUri -SLMCustomerId $SLMCustomerId -SLMApiCredentials $SLMApiCredentials -CleanupBody
     
     
-    if (-not [string]::IsNullOrEmpty($filter)) {
-        $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration -filter $filter
+    if (-not [string]::IsNullOrEmpty($queryfilter)) {
+        $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration -filter $queryfilter
         return $SLMLicenses
     }
     
@@ -62,7 +62,18 @@ function get-pswsslmlicenses {
         return $SLMLicenses
     }
    
+    if ($ApplicationNameSearch.Length -ge 3) {
+        $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration
+        $SLMLicensesSearchResult = $SLMLicenses | Where-Object { $_.ApplicationName -like "*$ApplicationNameSearch*" }
+        return $SLMLicensesSearchResult
+    }
+
+    if ($ApplicationNameSearch.Length -ge 1) {
+        return
+    }
+
     $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration
+
     return $SLMLicenses
     
 }
@@ -82,4 +93,6 @@ function get-pswsslmlicenses {
 ## Examples
 #get-pswsslmlicenses
 #get-pswsslmlicenses -LicenseId 3
-#get-pswsslmlicenses -filter "ApplicationName eq 'IBM Spectrum Protect 7.1 for Mail'"
+#get-pswsslmlicenses -queryfilter "ApplicationName eq 'IBM Spectrum Protect 7.1 for Mail'"
+#get-pswsslmlicenses -ApplicationNameSearch 'IBM'
+#get-pswsslmlicenses -ApplicationNameSearch 'IB'
