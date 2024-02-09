@@ -1,5 +1,5 @@
 function get-pswsslmlicenses {
-    param($LicenseId, $queryfilter, $ApplicationNameSearch)
+    param($LicenseId, $queryfilter, $ApplicationNameSearch, $SortBy, $SortDescendingBool)
     
     
     #region debug setup
@@ -51,28 +51,39 @@ function get-pswsslmlicenses {
     
     $SLMApiEndpointConfiguration = New-SLMApiEndpointConfiguration -SLMUri $SLMUri -SLMCustomerId $SLMCustomerId -SLMApiCredentials $SLMApiCredentials -CleanupBody
     
+
+    
+
     
     if (-not [string]::IsNullOrEmpty($queryfilter)) {
         $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration -filter $queryfilter
-        return $SLMLicenses
+        #return $SLMLicenses
     }
     
-    if ([int]$LicenseId -gt 0) {
+    elseif ([int]$LicenseId -gt 0) {
         $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration -Id $LicenseId
-        return $SLMLicenses
+        #return $SLMLicenses
     }
    
-    if ($ApplicationNameSearch.Length -ge 3) {
+    elseif ($ApplicationNameSearch.Length -ge 3) {
         $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration
-        $SLMLicensesSearchResult = $SLMLicenses | Where-Object { $_.ApplicationName -like "*$ApplicationNameSearch*" }
-        return $SLMLicensesSearchResult
+        $SLMLicenses = $SLMLicenses | Where-Object { $_.ApplicationName -like "*$ApplicationNameSearch*" }
+        #return $SLMLicenses
     }
 
-    if ($ApplicationNameSearch.Length -ge 1) {
+    elseif ($ApplicationNameSearch.Length -ge 1) {
         return
     }
 
-    $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration
+    else {
+        $SLMLicenses = Get-SLMLicenses -SLMApiEndpointConfiguration $SLMApiEndpointConfiguration 
+    }
+
+    if ([string]::IsNullOrEmpty($SortBy)) { $SortBy = 'ApplicationName' }
+
+    [bool]$SortDescendingBool = [System.Convert]::ToBoolean($SortDescendingBool)
+
+    $SLMLicenses = $SLMLicenses | Sort-Object $SortBy -Descending:$SortDescendingBool
 
     return $SLMLicenses
     
@@ -91,7 +102,7 @@ function get-pswsslmlicenses {
 #UpdatedBy       
     
 ## Examples
-#get-pswsslmlicenses
+#get-pswsslmlicenses -SortBy 'Id' -ApplicationNameSearch 'Acrobat' -SortDescendingBool 'True'
 #get-pswsslmlicenses -LicenseId 3
 #get-pswsslmlicenses -queryfilter "ApplicationName eq 'IBM Spectrum Protect 7.1 for Mail'"
 #get-pswsslmlicenses -ApplicationNameSearch 'IBM'
